@@ -1,24 +1,19 @@
 name: Build tvOSBrowser IPA
-
 on:
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: macos-latest
-
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-
-    - name: Find Xcode project
-      run: find . -name "*.xcodeproj" | head -5
-
+    - name: List schemes
+      run: xcodebuild -list -project _Project/Browser.xcodeproj 2>&1 || true
     - name: Build for tvOS device
       run: |
         xcodebuild \
-          -project _Project/tvOSBrowser.xcodeproj \
-          -scheme tvOSBrowser \
+          -project _Project/Browser.xcodeproj \
+          -scheme Browser \
           -configuration Release \
           -destination 'generic/platform=tvOS' \
           -derivedDataPath ./build \
@@ -26,7 +21,6 @@ jobs:
           CODE_SIGN_IDENTITY="" \
           PROVISIONING_PROFILE="" \
           DEVELOPMENT_TEAM=""
-
     - name: Package as IPA
       run: |
         APP_PATH=$(find ./build -name "*.app" -path "*/Release-appletvos/*" | head -1)
@@ -34,7 +28,6 @@ jobs:
         mkdir -p Payload
         cp -r "$APP_PATH" Payload/
         zip -r tvOSBrowser.ipa Payload/
-
     - name: Upload IPA artifact
       uses: actions/upload-artifact@v4
       with:
