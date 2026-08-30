@@ -7,8 +7,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-    - name: List schemes
-      run: xcodebuild -list -project _Project/Browser.xcodeproj 2>&1 || true
+    - name: Find real project path
+      run: find . -name "*.xcodeproj" -o -name "*.xcworkspace" | head -10
     - name: Build for tvOS device
       run: |
         xcodebuild \
@@ -24,7 +24,6 @@ jobs:
     - name: Package as IPA
       run: |
         APP_PATH=$(find ./build -name "*.app" -path "*/Release-appletvos/*" | head -1)
-        echo "Found app at: $APP_PATH"
         mkdir -p Payload
         cp -r "$APP_PATH" Payload/
         zip -r tvOSBrowser.ipa Payload/
